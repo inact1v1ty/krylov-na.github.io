@@ -10,8 +10,9 @@ import "./Background.css";
 
 interface GLData {
   program: WebGLProgram;
-  colorLocation: WebGLUniformLocation;
   vao: WebGLVertexArrayObject;
+  resolutionLocation: WebGLUniformLocation;
+  timeLocation: WebGLUniformLocation;
 }
 
 class Background extends React.Component {
@@ -97,7 +98,8 @@ class Background extends React.Component {
       );
 
       // lookup uniforms
-      const colorLocation = gl.getUniformLocation(program, "u_color");
+      const resolutionLocation = gl.getUniformLocation(program, "resolution")!;
+      const timeLocation = gl.getUniformLocation(program, "time")!;
 
       // prettier-ignore
       const vertices = [
@@ -165,8 +167,9 @@ class Background extends React.Component {
 
       this.data = {
         program,
-        colorLocation: colorLocation!,
         vao: vao!,
+        resolutionLocation,
+        timeLocation,
       };
 
       requestAnimationFrame(this.draw);
@@ -177,7 +180,7 @@ class Background extends React.Component {
     const gl = this.gl;
     now *= 0.001;
     if (gl && this.data) {
-      const { program, colorLocation, vao } = this.data;
+      const { program, vao, resolutionLocation, timeLocation } = this.data;
       this.resizeCanvasToDisplaySize(gl.canvas);
 
       gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
@@ -192,8 +195,8 @@ class Background extends React.Component {
       // Bind the attribute/buffer set we want.
       gl.bindVertexArray(vao);
 
-      // Draw in Red
-      gl.uniform4fv(colorLocation, [1, 0, 0, 1]);
+      gl.uniform2fv(resolutionLocation, [this.size.width, this.size.height]);
+      gl.uniform1f(timeLocation, now);
 
       gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
     }
